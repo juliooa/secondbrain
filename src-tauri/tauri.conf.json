@@ -55,10 +55,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 768,
         "resizable": true,
         "title": "Secondbrain",
-        "width": 800
+        "width": 1024
       }
     ]
   }

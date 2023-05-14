@@ -28,12 +28,12 @@ fn main() {
 }
 
 #[tauri::command]
-async fn infere(message: String, window: Window, app_handle: tauri::AppHandle) -> String {
+async fn infere(text: String, app_handle: tauri::AppHandle, window: tauri::Window) -> String {
     let model = load_model();
     let mut session = model.start_session(Default::default());
     let app_state = app_handle.state::<AppState>();
     let mut conversation = app_state.inner().messages.lock().unwrap();
-    conversation.push(format!("Human: {message}"));
+    conversation.push(format!("Human: {text}"));
     let system_message = app_state.inner().system_message.lock().unwrap();
     let mut prompt = format!("{}\n\n", system_message);
     for (_, message) in conversation.iter().enumerate() {
@@ -52,34 +52,29 @@ async fn infere(message: String, window: Window, app_handle: tauri::AppHandle) -
         },
         // OutputRequest
         &mut Default::default(),
-        |t| {
-            print!("{t}");
-            std::io::stdout().flush().unwrap();
-            answer.push_str(t);
-            window
-                .emit(
-                    "new_token",
-                    Payload {
-                        message: t.to_string(),
-                    },
-                )
-                .unwrap();
-            Ok(())
+        |inference_response| match inference_response {
+            llm::InferenceResponse::PromptToken(_) => Ok(llm::InferenceFeedback::Continue),
+            llm::InferenceResponse::InferredToken(t) => {
+                std::io::stdout().flush().unwrap();
+                println!("{t}");
+                answer.push_str(&t);
+                window
+                    .emit(
+                        "new_token",
+                        Payload {
+                            message: t.to_string(),
+                        },
+                    )
+                    .unwrap();
+                Ok(llm::InferenceFeedback::Continue)
+            }
+            _ => Ok(llm::InferenceFeedback::Continue),
         },
     );
-
-    let conversation_string = conversation.join("");
-    let clean_answer = answer.replace(&conversation_string, "");
-    conversation.push(clean_answer.clone());
-    println!("-----");
-    for (_, message) in conversation.iter().enumerate() {
-        println!("{}\n", message);
-        println!("+++");
-    }
-    println!("-----");
+    conversation.push(answer.clone());
 
     match res {
-        Ok(_) => format!("{}", clean_answer),
+        Ok(_) => format!("{}", answer),
         Err(err) => format!("\n{err}"),
     }
 }

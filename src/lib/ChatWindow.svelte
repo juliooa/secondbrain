@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { invoke } from '@tauri-apps/api/tauri';
-	import { emit, listen } from '@tauri-apps/api/event';
-	import { appWindow, WebviewWindow } from '@tauri-apps/api/window';
+	import { listen } from '@tauri-apps/api/event';
 	import type { Message } from './types';
+	import 'iconify-icon';
+	import MessageBlock from './MessageBlock.svelte';
 
 	let inputMessage = '';
 	let messages: Message[] = [];
@@ -12,36 +13,59 @@
 		let currentMessage = inputMessage;
 		inputMessage = '';
 		console.log('infere', currentMessage);
-		messages.push({ text: 'Human: ' + currentMessage, role: 'human' } satisfies Message);
-		messages.push({ text: '...', role: 'assistant' } satisfies Message);
+		messages.push({
+			text: currentMessage,
+			role: 'human',
+			id: generateRandomId()
+		} satisfies Message);
+		messages.push({ text: '...', role: 'assistant', id: generateRandomId() } satisfies Message);
 		messages = messages;
-		let answer: string = await invoke('infere', { message: currentMessage });
-		console.log(answer);
-		messages[messages.length - 1].text = answer;
+		let answer: string = console.log(answer);
+		messages[messages.length - 1] = {
+			text: answer,
+			role: 'assistant',
+			id: generateRandomId()
+		};
 		messages = messages;
 		incomingMessage = '';
 	}
 
 	listen('new_token', (event) => {
-		console.log(event.event, event.payload);
+		console.log(incomingMessage);
 		incomingMessage = incomingMessage + event.payload.message;
-		messages[messages.length - 1].text = incomingMessage;
+		console.log(incomingMessage);
+		messages[messages.length - 1] = {
+			text: incomingMessage,
+			role: 'assistant',
+			id: generateRandomId()
+		};
 		messages = messages;
 	});
 
 	// emits the `click` event with the object payload
+
+	function generateRandomId(): number {
+		return Math.floor(Math.random() * 100000);
+	}
 </script>
 
-<div>
-	<ul>
-		{#each messages as message}
-			<li>
-				<p>{message.text}</p>
-			</li>
+<div class="flex flex-col h-screen">
+	<div class="flex-grow overflow-y-auto">
+		{#each messages as message (message.id)}
+			<MessageBlock {message} />
 		{/each}
-	</ul>
-	<form on:submit|preventDefault={infere}>
-		<input placeholder="Enter a message..." bind:value={inputMessage} />
-		<button type="submit">Infere</button>
-	</form>
+	</div>
+
+	<div class="m-3">
+		<form
+			class="input-group flex flex-row rounded-container-token"
+			on:submit|preventDefault={infere}
+		>
+			<input class="input p-3" placeholder="Enter a message..." bind:value={inputMessage} />
+			<button class="btn variant-filled-primary rounded-none" type="submit"
+				><span>Send</span>
+				<iconify-icon icon="ion:paper-plane-outline" /></button
+			>
+		</form>
+	</div>
 </div>
