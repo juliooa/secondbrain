@@ -11,7 +11,7 @@ export type LanguageModel = {
 	filename: string;
 	image: string;
 	downloaded: boolean;
-	default: boolean;
+	current: boolean;
 };
 
 export type CommandResponseLanguagesModels = {
