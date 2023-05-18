@@ -1,0 +1,46 @@
+{
+    "models": [
+        {
+            "id": 1,
+            "name": "Wizard-Vicuna-13B-Uncensored-GGML",
+            "url": "https://huggingface.co/TheBloke/Wizard-Vicuna-13B-Uncensored-GGML/resolve/main/Wizard-Vicuna-13B-Uncensored.ggml.q4_0.bin",
+            "filename": "wizard-vicuna-13B-uncensored.ggml.q4_0.bin",
+            "image": ""
+          },
+          {
+            "id": 2,
+            "name": "Koala-7B-GGML",
+            "url": "https://huggingface.co/TheBloke/koala-7B-GGML/resolve/main/koala-7B.ggml.q4_0.bin",
+            "filename": "koala-7B.ggml.q4_0.bin",
+            "image": ""
+          },
+          {
+            "id": 3,
+            "name": "TheBloke/WizardLM-7B-uncensored-GGML",
+            "url": "https://huggingface.co/TheBloke/WizardLM-7B-uncensored-GGML/resolve/main/WizardLM-7B-uncensored.ggml.q4_0.bin",
+            "filename": "wizardLM-7B-uncensored.ggml.q4_0.bin",
+            "image": ""
+          },
+          {
+            "id": 4,
+            "name": "Vicuna-7b-1.1",
+            "url": "https://huggingface.co/eachadea/ggml-vicuna-7b-1.1/resolve/main/ggml-vic7b-q4_0.bin",
+            "filename": "ggml-vic7b-q4_0.bin",
+            "image": ""
+          },
+          {
+            "id":5,
+            "name": "data set",
+            "url": "https://huggingface.co/datasets/sam-mosaic/vicuna_alpaca_hc3_chatml/resolve/main/data/train-00000-of-00001-f7dc6b27d6a78526.parquet",
+            "filename": "train-00000-of-00001-f7dc6b27d6a78526.parquet",
+            "image": ""            
+          },
+          {
+            "id":6,
+            "name": "WizardLM-7B-GGML",
+            "url": "https://huggingface.co/TheBloke/wizardLM-7B-GGML/resolve/main/wizardLM-7B.ggml.q4_0.bin",
+            "filename": "wizardLM-7B.ggml.q4_2.bin",
+            "image": ""            
+          }
+    ]
+}

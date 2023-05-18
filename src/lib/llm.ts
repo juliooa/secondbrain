@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api';
 
-async function infere(text: string) {
+export async function infere(text: string): Promise<string> {
 	return await invoke('infere', { text: text });
 }

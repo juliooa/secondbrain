@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { invoke } from '@tauri-apps/api/tauri';
 	import { listen } from '@tauri-apps/api/event';
-	import type { Message } from './types';
+	import type { Message } from '../types';
 	import 'iconify-icon';
 	import MessageBlock from './MessageBlock.svelte';
+	import { infere } from '../llm';
+	import ChatInput from './ChatInput.svelte';
 
-	let inputMessage = '';
 	let messages: Message[] = [];
 	let incomingMessage: string = '';
+	let chatContainer: HTMLElement;
 
-	async function infere() {
-		let currentMessage = inputMessage;
-		inputMessage = '';
+	async function sendMessage(currentMessage: string) {
 		console.log('infere', currentMessage);
 		messages.push({
 			text: currentMessage,
@@ -20,7 +19,8 @@
 		} satisfies Message);
 		messages.push({ text: '...', role: 'assistant', id: generateRandomId() } satisfies Message);
 		messages = messages;
-		let answer: string = console.log(answer);
+		let answer: string = await infere(currentMessage);
+		console.log(answer);
 		messages[messages.length - 1] = {
 			text: answer,
 			role: 'assistant',
@@ -42,30 +42,28 @@
 		messages = messages;
 	});
 
-	// emits the `click` event with the object payload
-
 	function generateRandomId(): number {
 		return Math.floor(Math.random() * 100000);
+	}
+
+	function onClearPressed(): void {
+		messages = [];
+		messages = messages;
+	}
+
+	function scrollChatBottom(behavior?: ScrollBehavior): void {
+		chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior });
 	}
 </script>
 
 <div class="flex flex-col h-screen">
-	<div class="flex-grow overflow-y-auto">
+	<div class="flex-grow overflow-y-auto" bind:this={chatContainer}>
 		{#each messages as message (message.id)}
 			<MessageBlock {message} />
 		{/each}
 	</div>
 
 	<div class="m-3">
-		<form
-			class="input-group flex flex-row rounded-container-token"
-			on:submit|preventDefault={infere}
-		>
-			<input class="input p-3" placeholder="Enter a message..." bind:value={inputMessage} />
-			<button class="btn variant-filled-primary rounded-none" type="submit"
-				><span>Send</span>
-				<iconify-icon icon="ion:paper-plane-outline" /></button
-			>
-		</form>
+		<ChatInput {onClearPressed} {sendMessage} />
 	</div>
 </div>

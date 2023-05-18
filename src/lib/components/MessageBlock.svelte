@@ -3,7 +3,7 @@
 	export let message: Message;
 
 	import { CodeBlock } from '@skeletonlabs/skeleton';
-	import type { Message } from './types';
+	import type { Message } from '../types';
 
 	interface TextBlock {
 		isCodeBlock: boolean;

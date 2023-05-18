@@ -37,7 +37,9 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+        "configs/models.json"
+      ],
       "shortDescription": "",
       "targets": "all",
       "windows": {
