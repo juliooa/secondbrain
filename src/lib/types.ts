@@ -17,3 +17,7 @@ export type LanguageModel = {
 export type CommandResponseLanguagesModels = {
 	models: LanguageModel[];
 };
+
+export interface NewTokenPayload {
+	message: String;
+}

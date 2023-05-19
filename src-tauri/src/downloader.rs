@@ -1,10 +1,13 @@
 use futures_util::TryStreamExt;
-use serde::{ser::Serializer, Serialize};
-use tauri::{command, Runtime, Window};
-use tokio::{fs::File, io::AsyncWriteExt};
-use tokio_util::codec::{BytesCodec, FramedRead};
-
 use read_progress_stream::ReadProgressStream;
+use serde::{ser::Serializer, Serialize};
+use tauri::{Manager, Runtime, Window};
+use tokio::task::JoinHandle;
+use tokio::{
+    fs::{self, File},
+    io::AsyncWriteExt,
+};
+use tokio_util::codec::{BytesCodec, FramedRead};
 
 use std::{collections::HashMap, sync::Mutex};
 
@@ -31,12 +34,78 @@ impl Serialize for Error {
 
 #[derive(Clone, Serialize)]
 struct ProgressPayload {
-    id: u32,
+    modelId: u32,
     progress: u64,
     total: u64,
 }
 
 type Callback = Box<dyn FnOnce() + Send + 'static>;
+pub struct DownloadState {
+    pub tokio_handle: Mutex<Option<JoinHandle<()>>>,
+}
+
+#[tauri::command]
+pub async fn download_model(
+    url: String,
+    model_id: u32,
+    file_name: String,
+    finish_download_notice: String,
+    window: tauri::Window,
+    app_handle: tauri::AppHandle,
+) -> std::result::Result<u32, String> {
+    let mut download_path = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .unwrap()
+        .join("models");
+    std::fs::create_dir_all(&download_path).unwrap();
+    download_path.push(file_name);
+
+    println!("Downloading model to {}", download_path.to_str().unwrap());
+    let callback = Box::new(|| {
+        println!("Callback called!");
+    });
+
+    let handler = tokio::task::spawn(async move {
+        let result = download(
+            window,
+            model_id,
+            &url,
+            download_path.to_str().unwrap(),
+            HashMap::new(),
+            &finish_download_notice,
+            callback,
+        )
+        .await;
+
+        match result {
+            Ok(_) => println!("Download finished!"),
+            Err(err) => println!("Error downloading model: {}", err),
+        }
+    });
+
+    let app_state = app_handle.state::<DownloadState>();
+    let mut lock = app_state.tokio_handle.lock().unwrap();
+    (*lock).replace(handler);
+
+    Ok(model_id)
+}
+#[tauri::command]
+pub async fn cancel_download(
+    model_id: u32,
+    app_handle: tauri::AppHandle,
+) -> std::result::Result<u32, String> {
+    let app_state = app_handle.state::<DownloadState>();
+    let lock = app_state.tokio_handle.lock().unwrap();
+    if let Some(handler) = &*lock {
+        handler.abort();
+    }
+    //TODO delete the file here instead of calling from frontend
+    Ok(model_id)
+}
+fn on_finish_download() {
+    // set the model as downloaded
+}
 
 pub(crate) async fn download<R: Runtime>(
     window: Window<R>,
@@ -47,12 +116,8 @@ pub(crate) async fn download<R: Runtime>(
     finish_download_notice: &str,
     callback: Callback,
 ) -> Result<u32> {
-    println!("Downloading modell! {}", url);
     let client = reqwest::Client::new();
-
     let mut request = client.get(url);
-    // // Loop trought the headers keys and values
-    // // and add them to the request object.
     for (key, value) in headers {
         request = request.header(&key, value);
     }
@@ -80,7 +145,7 @@ pub(crate) async fn download<R: Runtime>(
                 let _ = window.emit(
                     "progress_download",
                     ProgressPayload {
-                        id,
+                        modelId: id,
                         progress: chunk.len() as u64,
                         total,
                     },
@@ -97,7 +162,6 @@ pub(crate) async fn download<R: Runtime>(
     Ok(id)
 }
 
-#[command]
 async fn upload<R: Runtime>(
     window: Window<R>,
     id: u32,
@@ -132,11 +196,27 @@ fn file_to_body<R: Runtime>(id: u32, window: Window<R>, file: File) -> reqwest::
             let _ = window.lock().unwrap().emit(
                 "upload://progress",
                 ProgressPayload {
-                    id,
+                    modelId: id,
                     progress,
                     total,
                 },
             );
         }),
     ))
+}
+
+pub(crate) async fn delete(file_path: &str, callback: Callback) -> std::result::Result<(), String> {
+    println!("Deleting file! {}", file_path);
+
+    match fs::remove_file(file_path).await {
+        Ok(()) => {
+            println!("File removed successfully");
+            callback();
+            Ok(())
+        }
+        Err(err) => {
+            eprintln!("Failed to remove file: {}", err);
+            Err(err.to_string())
+        }
+    }
 }

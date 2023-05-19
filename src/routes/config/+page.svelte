@@ -4,26 +4,57 @@
 	import { invoke } from '@tauri-apps/api';
 	import { listen } from '@tauri-apps/api/event';
 	import 'iconify-icon';
+	import { modalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent } from '@skeletonlabs/skeleton';
 
-	interface ProgressPayload {
-		id: number;
+	interface DownloadProgress {
+		modelId: number;
 		progress: number;
 		total: number;
 	}
 
 	let current_model: LanguageModel | null = null;
-	let downloadComplete: boolean = false;
-	let downloadFinishNotice = '';
+	let downloadProgress: DownloadProgress | null = null;
+
+	let showNotice: boolean = false;
+	let noticeMessage = '';
+	let noticeBg: string = 'variant-filled-success';
+
 	let selectedModelId: number = 0;
 	let isDownloading: boolean = false;
-	let progress: number = 0;
-	let total: number = 0;
+
 	let languageModels: LanguageModel[] = [];
 	let selectedModelToDownloadId: number = 0;
+
+	listen<DownloadProgress>('progress_download', (progress) => {
+		console.log('Progress download:' + JSON.stringify(progress));
+		if (downloadProgress == null) {
+			downloadProgress = {
+				modelId: progress.payload.modelId,
+				progress: 0,
+				total: 0
+			};
+		}
+		downloadProgress.progress += formatBytesToMegabytes(progress.payload.progress);
+		downloadProgress.total = formatBytesToMegabytes(progress.payload.total);
+		if (downloadProgress.progress >= downloadProgress.total) {
+			isDownloading = false;
+		}
+	});
+
+	listen<string>('finish_download', (event) => {
+		isDownloading = false;
+		downloadProgress = null;
+		showNoticeAlert(event.payload);
+
+		getLanguageModels();
+	});
+
 	async function downloadModel() {
 		let selectedModel = languageModels.filter((model) => model.id == selectedModelToDownloadId)[0];
 		console.log('Prepare to download:' + selectedModel);
 		isDownloading = true;
+
 		invoke('download_model', {
 			url: selectedModel.url,
 			modelId: selectedModel.id,
@@ -31,24 +62,10 @@
 			finishDownloadNotice: `Finish downloading model ${selectedModel.name}`
 		})
 			.then((result) => console.log(result))
-			.catch((error) => console.error(error));
+			.catch((error) => {
+				showErrorAlert('Error:' + error);
+			});
 	}
-
-	listen<ProgressPayload>('progress_download', (progressPayload) => {
-		progress += progressPayload.payload.progress;
-		total = progressPayload.payload.total;
-		if (progressPayload.payload.progress >= progressPayload.payload.total) {
-			isDownloading = false;
-		}
-	});
-
-	listen<string>('finish_download', (event) => {
-		console.log('Finish download:' + event.payload);
-		downloadFinishNotice = event.payload;
-		downloadComplete = true;
-		isDownloading = false;
-		getLanguageModels();
-	});
 
 	function getLanguageModels() {
 		invoke<CommandResponseLanguagesModels>('get_language_models')
@@ -57,13 +74,13 @@
 				languageModels = result.models;
 				current_model = languageModels.filter((model) => model.current == true)[0];
 			})
-			.catch((error) => console.error(error));
+			.catch((error) => {
+				showErrorAlert('Error:' + error);
+			});
 	}
 
-	getLanguageModels();
-
 	function closeNotice() {
-		downloadComplete = false;
+		showNotice = false;
 	}
 
 	function activate_model() {
@@ -73,11 +90,79 @@
 			modelFilename: selectedModel.filename,
 			finishDownloadNotice: `Finish downloading model ${selectedModel.name}`
 		})
-			.then((result) => {
-				console.log(result);
+			.then(() => {
+				console.log('Model activated:' + selectedModel.name);
+				showNoticeAlert(selectedModel.name + ' is the active model.');
 				getLanguageModels();
 			})
-			.catch((error) => console.error(error));
+			.catch((error) => {
+				console.log('Error:' + error);
+				showErrorAlert('Error:' + error);
+			});
+	}
+	function delete_model() {
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: 'Please Confirm',
+			modalClasses: '!bg-red-500',
+			buttonTextConfirm: 'Yes, delete it',
+			body: 'This will delete the file from your disk. To use it again you will need to download it. Are you sure?',
+			response: (confirm: boolean) => {
+				if (confirm) {
+					call_delete_model_command(selectedModelId);
+				}
+			}
+		};
+		modalStore.trigger(modal);
+	}
+	function showNoticeAlert(message: string) {
+		noticeMessage = message;
+		showNotice = true;
+		noticeBg = 'variant-filled-success';
+	}
+
+	function showErrorAlert(error: string) {
+		noticeBg = 'variant-filled-error';
+		noticeMessage = error;
+		showNotice = true;
+	}
+
+	function formatBytesToMegabytes(bytes: number): number {
+		return bytes / (1024 * 1024);
+	}
+
+	getLanguageModels();
+
+	function cancelDownload() {
+		invoke<number>('cancel_download', {
+			modelId: downloadProgress?.modelId
+		})
+			.then((canceledModelId) => {
+				isDownloading = false;
+				downloadProgress = null;
+				call_delete_model_command(canceledModelId);
+			})
+			.catch((error) => {
+				console.log('Error:' + error);
+				showErrorAlert('Error:' + error);
+			});
+	}
+
+	function call_delete_model_command(modelId: number) {
+		let selectedModel = languageModels.filter((model) => model.id == modelId)[0];
+		invoke('delete_model', {
+			modelId: selectedModel.id,
+			modelFilename: selectedModel.filename,
+			finishDownloadNotice: `Model ${selectedModel.name} deleted`
+		})
+			.then(() => {
+				showNoticeAlert(`Model ${selectedModel.name} deleted`);
+				getLanguageModels();
+			})
+			.catch((error) => {
+				console.log('Error:' + error);
+				showErrorAlert('Error:' + error);
+			});
 	}
 </script>
 
@@ -98,9 +183,16 @@
 						<option value={model.id} disabled={model.current}>{model.name}</option>
 					{/each}
 				</select>
-				<button type="button" class="btn variant-filled-secondary" on:click={() => activate_model()}
-					>Activate model</button
-				>
+				<div class="flex flex-row justify-between">
+					<button
+						type="button"
+						class="btn variant-filled-secondary"
+						on:click={() => activate_model()}>Activate model</button
+					>
+					<button type="button" class="btn variant-filled-error" on:click={() => delete_model()}
+						>Delete model</button
+					>
+				</div>
 			</label>
 			<label class="label mt-4">
 				<span>Available models to download</span>
@@ -114,17 +206,44 @@
 				>
 			</label>
 		</div>
-		<div>
+		<div class="card">
 			{#if isDownloading}
-				<p>Downloading...</p>
-				<p>Progress: {progress}</p>
-				<p>Total: {total}</p>
-				<ProgressBar max={total} min={0} value={progress} />
+				<div class="m-3">
+					<div class="flex flex-row justify-between">
+						<div>
+							<h4>Downloading...</h4>
+							<p>
+								Progress: {(downloadProgress?.progress || 0).toLocaleString(undefined, {
+									maximumFractionDigits: 2
+								})} Mb
+							</p>
+							<p>
+								Total: {(downloadProgress?.total || 0).toLocaleString(undefined, {
+									maximumFractionDigits: 2
+								})} Mb
+							</p>
+						</div>
+						<div>
+							<button class="btn-icon variant-filled btn-icon-sm" on:click={cancelDownload}>
+								<iconify-icon width="22" icon="ion:close" />
+							</button>
+						</div>
+					</div>
+					<div>
+						<ProgressBar
+							max={downloadProgress?.total}
+							min={0}
+							value={downloadProgress?.progress}
+							height="h-3"
+							meter="variant-filled-success"
+						/>
+					</div>
+				</div>
 			{/if}
-			{#if downloadComplete}
-				<aside class="alert variant-filled-success">
-					<div class="alert-message">
-						<h3 class="h3">{downloadFinishNotice}</h3>
+			{#if showNotice}
+				<aside class="alert {noticeBg} flex flex-row">
+					<div class="alert-message grow">
+						<h4>{noticeMessage}</h4>
 					</div>
 					<div class="alert-actions">
 						<button class="btn-icon variant-filled" on:click={closeNotice}>

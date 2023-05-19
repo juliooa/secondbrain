@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { listen } from '@tauri-apps/api/event';
-	import type { Message } from '../types';
+	import type { Message, NewTokenPayload } from '../types';
 	import 'iconify-icon';
 	import MessageBlock from './MessageBlock.svelte';
 	import { infere } from '../llm';
@@ -11,7 +11,6 @@
 	let chatContainer: HTMLElement;
 
 	async function sendMessage(currentMessage: string) {
-		console.log('infere', currentMessage);
 		messages.push({
 			text: currentMessage,
 			role: 'human',
@@ -20,7 +19,6 @@
 		messages.push({ text: '...', role: 'assistant', id: generateRandomId() } satisfies Message);
 		messages = messages;
 		let answer: string = await infere(currentMessage);
-		console.log(answer);
 		messages[messages.length - 1] = {
 			text: answer,
 			role: 'assistant',
@@ -30,7 +28,7 @@
 		incomingMessage = '';
 	}
 
-	listen('new_token', (event) => {
+	listen<NewTokenPayload>('new_token', (event) => {
 		console.log(incomingMessage);
 		incomingMessage = incomingMessage + event.payload.message;
 		console.log(incomingMessage);
