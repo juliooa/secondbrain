@@ -88,6 +88,7 @@
 		invoke('set_current_model', {
 			modelId: selectedModel.id,
 			modelFilename: selectedModel.filename,
+			modelName: selectedModel.name,
 			finishDownloadNotice: `Finish downloading model ${selectedModel.name}`
 		})
 			.then(() => {

@@ -74,6 +74,7 @@ pub fn get_language_models(app_handle: tauri::AppHandle) -> GetLanguageModelsRes
 pub fn set_current_model(
     model_id: u32,
     model_filename: &str,
+    model_name: &str,
     app_handle: tauri::AppHandle,
 ) -> Result<(), String> {
     println!("Command: set_current_model id:{}", model_id);
@@ -95,6 +96,9 @@ pub fn set_current_model(
                 .unwrap();
             store
                 .insert("current_model_id".to_string(), json!(model_id))
+                .unwrap();
+            store
+                .insert("current_model_name".to_string(), json!(model_name))
                 .unwrap();
             store.save().unwrap();
 

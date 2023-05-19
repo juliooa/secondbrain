@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { infere } from '$lib/llm';
-	import type { NewTokenPayload } from '$lib/types';
-	import { CodeBlock, ProgressBar } from '@skeletonlabs/skeleton';
+	import type { CommandResponseLanguagesModels, LanguageModel, NewTokenPayload } from '$lib/types';
+	import { Avatar, CodeBlock, ProgressBar } from '@skeletonlabs/skeleton';
+	import { invoke } from '@tauri-apps/api';
 	import { listen } from '@tauri-apps/api/event';
 	import { text } from 'svelte/internal';
+	import { Store } from 'tauri-plugin-store-api';
+	import { LocalStore } from '$lib/local_store';
 
 	let query = '';
 	let current_query = '';
@@ -63,74 +66,92 @@
 		incomingMessage = '';
 		current_query = '';
 	}
+
+	async function getModelName() {
+		(await LocalStore.getInstance()).getModelName().then((value) => {
+			console.log(value);
+			modelName = value!;
+		});
+	}
+	getModelName();
+	let modelName: string;
 </script>
 
-<div class="p-4 h-screen">
-	<h1 class="h1">Ask the model</h1>
-	<div class="flex justify-center items-center mt-8">
-		<div class=" card h-full w-full">
-			<div class="p-4 md:p-10">
-				<form
-					class="flex"
-					on:submit|preventDefault={() => {
-						ask_model();
-					}}
-				>
-					<input
-						class="input text-xl"
-						type="text"
-						placeholder="your question here"
-						bind:value={query}
-						disabled={loading}
-					/>
+<div class="h-screen">
+	<div class="p-4">
+		<h2>Ask the model</h2>
+		{#if modelName != null}
+			<div class="flex items-center">
+				<p class="text-xl text-warning-400">{modelName}</p>
+			</div>
+		{/if}
+	</div>
+	<div class="p-4">
+		<div class="flex justify-center items-center">
+			<div class=" card h-full w-full">
+				<div class="p-4 md:p-10">
+					<form
+						class="flex"
+						on:submit|preventDefault={() => {
+							ask_model();
+						}}
+					>
+						<input
+							class="input text-xl"
+							type="text"
+							placeholder="your question here"
+							bind:value={query}
+							disabled={loading}
+						/>
+
+						{#if loading}
+							<button
+								type="submit"
+								class="btn variant-filled-error w-1/5 ml-4 text-xl"
+								on:click={() => {
+									cancel_inference();
+								}}>Cancel</button
+							>
+						{:else}
+							<button
+								type="submit"
+								class="btn variant-filled-secondary w-1/5 ml-4 text-xl"
+								on:click={() => {
+									current_query = query;
+									ask_model();
+								}}>Ask</button
+							>
+						{/if}
+					</form>
 
 					{#if loading}
-						<button
-							type="submit"
-							class="btn variant-filled-error w-1/5 ml-4 text-xl"
-							on:click={() => {
-								cancel_inference();
-							}}>Cancel</button
-						>
-					{:else}
-						<button
-							type="submit"
-							class="btn variant-filled-secondary w-1/5 ml-4 text-xl"
-							on:click={() => {
-								current_query = query;
-								ask_model();
-							}}>Ask</button
-						>
+						<div class="mt-5">
+							<ProgressBar height="h-3" meter="bg-warning-500" />
+						</div>
 					{/if}
-				</form>
-
-				{#if loading}
-					<div class="mt-5">
-						<ProgressBar height="h-3" meter="bg-warning-500" />
-					</div>
-				{/if}
-				{#if current_query.length > 0}
-					<div>
-						<h4 class="text-xxl mb-2 mt-6">Question</h4>
-						<div class="flex flex-col rounded-[8px] bg-tertiary-500 p-4 text-xl">
-							<p style="white-space: pre-line;">{current_query}</p>
+					{#if current_query.length > 0}
+						<div>
+							<h4 class="text-xxl mb-2 mt-6">Question</h4>
+							<div class="flex flex-col rounded-[8px] bg-tertiary-500 p-4 text-xl">
+								<p style="white-space: pre-line;">{current_query}</p>
+							</div>
 						</div>
-					</div>
-				{/if}
-				{#if parsedTextBlocks.length > 0}
-					<div>
-						<h4 class="text-xxl mb-2 mt-6">Answer</h4>
-						<div class="flex flex-col rounded-[8px] bg-tertiary-500 p-4 text-xl">
-							{#each parsedTextBlocks as textBlock}
-								{#if textBlock.isCodeBlock}
-									<CodeBlock language={textBlock.language} code={textBlock.text} />
-								{:else}
-									<p style="white-space: pre-line;">{textBlock.text}</p>
-								{/if}
-							{/each}
+					{/if}
+					{#if parsedTextBlocks.length > 0}
+						<div>
+							<h4 class="text-xxl mb-2 mt-6">Answer</h4>
+							<div class="flex flex-col rounded-[8px] bg-tertiary-500 p-4 text-xl">
+								{#each parsedTextBlocks as textBlock}
+									{#if textBlock.isCodeBlock}
+										<CodeBlock language={textBlock.language} code={textBlock.text} />
+									{:else}
+										<p style="white-space: pre-line;">{textBlock.text}</p>
+									{/if}
+								{/each}
+							</div>
 						</div>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>
