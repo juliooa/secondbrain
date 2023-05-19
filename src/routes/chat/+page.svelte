@@ -6,7 +6,7 @@
 	import { infere } from '$lib/llm';
 	import ChatInput from '$lib/components/ChatInput.svelte';
 	import MessageBlock from '$lib/components/MessageBlock.svelte';
-	import { LocalStore } from '$lib/local_store';
+	import { getCurrentModelName } from '$lib/local_store';
 
 	let messages: Message[] = [];
 	let incomingMessage: string = '';
@@ -55,7 +55,7 @@
 		chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior });
 	}
 	async function getModelName() {
-		(await LocalStore.getInstance()).getModelName().then((value) => {
+		getCurrentModelName().then((value) => {
 			console.log(value);
 			modelName = value!;
 		});
@@ -65,7 +65,7 @@
 </script>
 
 <div class="flex flex-col h-screen">
-	<div class="p-4 variant-soft-primary">
+	<div class="p-4 variant-soft-primary flex flex-row justify-between">
 		<h3>
 			{#if modelName != null}
 				Conversation with <span class="text-xl text-warning-500">{modelName}</span>
@@ -73,6 +73,9 @@
 				<span class="text-xl text-error-500">No active model</span>
 			{/if}
 		</h3>
+		<button class="btn variant-ringed-primary" type="button" on:click={() => onClearPressed()}
+			><span>Clear conversation</span></button
+		>
 	</div>
 	<div class="flex-grow overflow-y-auto" bind:this={chatContainer}>
 		{#each messages as message (message.id)}
@@ -81,6 +84,6 @@
 	</div>
 
 	<div class="m-3">
-		<ChatInput {onClearPressed} {sendMessage} />
+		<ChatInput {sendMessage} />
 	</div>
 </div>

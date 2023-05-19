@@ -5,11 +5,11 @@ use downloader::DownloadState;
 
 use std::sync::Mutex;
 use tauri::Manager;
-use tauri_plugin_store::StoreBuilder;
 
 mod configs;
 mod downloader;
 mod language_model;
+mod localstore;
 struct AppState {
     system_message: Mutex<String>,
     messages: Mutex<Vec<String>>,
@@ -55,19 +55,10 @@ fn main() {
 }
 
 fn get_current_model_path(app_handle: tauri::AppHandle) -> Option<String> {
-    let mut store = StoreBuilder::new(app_handle, "store.bin".parse().unwrap()).build();
-    match store.load() {
-        Ok(_) => println!("Store loaded"),
-        Err(err) => println!("Store file not found: {}", err),
-    }
-    let current_model_id = store.get("current_model_id".to_string());
-    println!("1Current model id: {:?}", current_model_id);
-    let current_model_path = store.get("current_model_path".to_string());
-    println!("1Current model path: {:?}", current_model_path);
-    match store.get("current_model_path") {
+    match localstore::get_current_model_path(app_handle) {
         Some(value) => {
             println!("Current model path: {:?}", value);
-            let current_model_path: String = serde_json::from_value(value.clone()).unwrap();
+            let current_model_path: String = serde_json::from_value(value).unwrap();
             return Some(current_model_path);
         }
         None => {

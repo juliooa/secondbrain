@@ -1,14 +1,12 @@
 use llm::load_progress_callback_stdout as load_callback;
 use llm::InferenceRequest;
 use llm::LoadError;
-use serde_json::json;
 use std::convert::Infallible;
 use std::io::Write;
 use std::path::Path;
 use tauri::Manager;
-use tauri_plugin_store::StoreBuilder;
 
-use crate::{configs, downloader, AppState};
+use crate::{configs, downloader, localstore, AppState};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct LanguageModel {
@@ -31,24 +29,15 @@ pub fn get_language_models(app_handle: tauri::AppHandle) -> GetLanguageModelsRes
     println!("Command: get_language_models");
 
     let config_models = configs::get_config_language_models(&app_handle);
-
     let download_path = app_handle
         .path_resolver()
         .app_data_dir()
         .unwrap()
         .join("models");
 
-    let mut store = StoreBuilder::new(app_handle, "store.bin".parse().unwrap()).build();
-    match store.load() {
-        Ok(_) => println!("Store loaded"),
-        Err(err) => println!("Store file not found: {}", err),
-    }
-    let current_model_id = store.get("current_model_id".to_string());
-    println!("Current model id: {:?}", current_model_id);
-    let current_model_path = store.get("current_model_path".to_string());
-    println!("Current model path: {:?}", current_model_path);
-
+    let current_model_id = localstore::get_current_model_id(app_handle);
     let mut language_models: Vec<LanguageModel> = vec![];
+
     for model in config_models.iter() {
         let mut model_download_path = download_path.clone();
         model_download_path.push(&model.filename);
@@ -58,8 +47,8 @@ pub fn get_language_models(app_handle: tauri::AppHandle) -> GetLanguageModelsRes
             name: model.name.clone(),
             url: model.url.clone(),
             downloaded: model_download_path.exists(),
-            current: current_model_id.is_some()
-                && current_model_id.unwrap().as_u64().unwrap() as u32 == model.id,
+            current: current_model_id.as_ref().is_some()
+                && current_model_id.as_ref().unwrap().as_u64().unwrap() as u32 == model.id,
             filename: model.filename.clone(),
             image: model.image.clone(),
         });
@@ -89,18 +78,13 @@ pub fn set_current_model(
         Ok(model) => {
             let app_state = app_handle.state::<AppState>();
             app_state.model.lock().unwrap().replace(model);
-            println!("No current model path found");
-            let mut store = StoreBuilder::new(app_handle, "store.bin".parse().unwrap()).build();
-            store
-                .insert("current_model_path".to_string(), json!(model_path))
-                .unwrap();
-            store
-                .insert("current_model_id".to_string(), json!(model_id))
-                .unwrap();
-            store
-                .insert("current_model_name".to_string(), json!(model_name))
-                .unwrap();
-            store.save().unwrap();
+
+            localstore::insert_current_model_id(app_handle.clone(), model_id)?;
+            localstore::insert_current_model_name(app_handle.clone(), model_name.to_string())?;
+            localstore::insert_current_model_path(
+                app_handle,
+                model_path.to_str().unwrap().to_string(),
+            )?;
 
             Ok(())
         }

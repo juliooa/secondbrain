@@ -1,26 +1,16 @@
 import { Store } from 'tauri-plugin-store-api';
 
-export class LocalStore {
-	private store: Store = new Store('store.bin');
-	private static instance: LocalStore | null = null;
+export async function getModelName(): Promise<string | null> {
+	let store: Store = new Store('store.bin');
+	return await store.get<string>('current_model_name');
+}
 
-	private constructor() {
-		// Private constructor to prevent direct instantiation
-	}
+export async function getCurrentModelId(): Promise<number | null> {
+	let store: Store = new Store('store.bin');
+	return await store.get<number>('current_model_id');
+}
 
-	public static async getInstance(): Promise<LocalStore> {
-		if (!LocalStore.instance) {
-			LocalStore.instance = new LocalStore();
-			await LocalStore.instance.initialize();
-		}
-		return LocalStore.instance;
-	}
-
-	private async initialize(): Promise<void> {
-		await this.store.load();
-	}
-
-	public async getModelName() {
-		return await this.store.get<string>('current_model_name');
-	}
+export async function getCurrentModelName(): Promise<string | null> {
+	let store: Store = new Store('store.bin');
+	return await store.get<string>('current_model_name');
 }

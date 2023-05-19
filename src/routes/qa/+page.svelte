@@ -6,7 +6,7 @@
 	import { listen } from '@tauri-apps/api/event';
 	import { text } from 'svelte/internal';
 	import { Store } from 'tauri-plugin-store-api';
-	import { LocalStore } from '$lib/local_store';
+	import { getCurrentModelName } from '$lib/local_store';
 
 	let query = '';
 	let current_query = '';
@@ -68,7 +68,7 @@
 	}
 
 	async function getModelName() {
-		(await LocalStore.getInstance()).getModelName().then((value) => {
+		getCurrentModelName().then((value) => {
 			console.log(value);
 			modelName = value!;
 		});
@@ -80,11 +80,13 @@
 <div class="h-screen">
 	<div class="p-4">
 		<h2>Ask the model</h2>
-		{#if modelName != null}
-			<div class="flex items-center">
+		<div class="flex items-center">
+			{#if modelName != null}
 				<p class="text-xl text-warning-400">{modelName}</p>
-			</div>
-		{/if}
+			{:else}
+				<p class="text-xl text-error-500">No active model</p>
+			{/if}
+		</div>
 	</div>
 	<div class="p-4">
 		<div class="flex justify-center items-center">
