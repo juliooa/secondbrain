@@ -4,12 +4,15 @@
 	import { derived } from 'svelte/store';
 	import 'iconify-icon';
 	import logo from '$lib/assets/secondbrain_icon.png';
+	import Breathing from './Breathing.svelte';
 	const selected = derived(page, ($page) => $page.url.pathname);
 </script>
 
 <div class="bg-surface-50-900-token rounded-none h-full grid grid-cols-[auto_1fr] w-full">
 	<AppRail {selected}>
-		<AppRailTile hover=""><Avatar src={logo} width="w-12" rounded="rounded-full" /></AppRailTile>
+		<AppRailTile hover="" href="/">
+			<Breathing /></AppRailTile
+		>
 		<AppRailTile label="Q/A" href="/qa"
 			><iconify-icon width="28" icon="mdi:robot-happy-outline" /></AppRailTile
 		>

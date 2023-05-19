@@ -171,12 +171,15 @@
 	<h1 class="h1">Configuration</h1>
 	<div class="flex flex-col justify-between grow mt-4">
 		<div>
-			<span>Current Language Model</span>
-			{#if current_model}
-				<h4>{current_model?.name}</h4>
-			{:else}
-				<h4>No language set. Choose one or download one.</h4>
-			{/if}
+			Current Language Model:
+			<h4 class="variant-ringed-tertiary p-2">
+				{#if current_model}
+					<h4>{current_model?.name}</h4>
+				{:else}
+					<span class="text-red-400"> No model set. Choose or download one.</span>
+				{/if}
+			</h4>
+
 			<label class="label mt-4">
 				<span>Available language models</span>
 				<select class="select" size="6" bind:value={selectedModelId}>
@@ -212,7 +215,10 @@
 				<div class="m-3">
 					<div class="flex flex-row justify-between">
 						<div>
-							<h4>Downloading...</h4>
+							<h4>
+								Downloading... please do not leave this window until the download is complete, we
+								are still working to make this more mmm... smart.
+							</h4>
 							<p>
 								Progress: {(downloadProgress?.progress || 0).toLocaleString(undefined, {
 									maximumFractionDigits: 2
