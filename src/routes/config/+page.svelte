@@ -215,10 +215,11 @@
 				<div class="m-3">
 					<div class="flex flex-row justify-between">
 						<div>
-							<h4>
-								Downloading... please do not leave this window until the download is complete, we
-								are still working to make this more mmm... smart.
-							</h4>
+							<h4>Downloading...</h4>
+							<p>
+								Please do not leave this window until the download is complete, we are still working
+								to make this more mmm... smart.
+							</p>
 							<p>
 								Progress: {(downloadProgress?.progress || 0).toLocaleString(undefined, {
 									maximumFractionDigits: 2

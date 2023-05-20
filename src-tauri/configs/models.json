@@ -22,25 +22,40 @@
             "image": ""
           },
           {
-            "id": 4,
-            "name": "Vicuna-7b-1.1",
-            "url": "https://huggingface.co/eachadea/ggml-vicuna-7b-1.1/resolve/main/ggml-vic7b-q4_0.bin",
-            "filename": "ggml-vic7b-q4_0.bin",
-            "image": ""
-          },
-          {
-            "id":5,
-            "name": "data set",
-            "url": "https://huggingface.co/datasets/sam-mosaic/vicuna_alpaca_hc3_chatml/resolve/main/data/train-00000-of-00001-f7dc6b27d6a78526.parquet",
-            "filename": "train-00000-of-00001-f7dc6b27d6a78526.parquet",
-            "image": ""            
-          },
-          {
             "id":6,
             "name": "WizardLM-7B-GGML",
             "url": "https://huggingface.co/TheBloke/wizardLM-7B-GGML/resolve/main/wizardLM-7B.ggml.q4_0.bin",
             "filename": "wizardLM-7B.ggml.q4_2.bin",
             "image": ""            
+          },
+          {
+            "id":11,
+            "name": "Cerebras-2.7b-ggml",
+            "url": "https://huggingface.co/concedo/cerebras-2.7b-ggml/resolve/main/cerebras-2.7b-q4_0.bin",
+            "filename": "cerebras-2.7b-q4_0.bin",
+            "image": ""            
+          },
+          {
+            "id":12,
+            "name": "GPT-J-6B-Pygway-ggml-q4_1",
+            "url": "https://huggingface.co/Kastor/GPT-J-6B-Pygway-ggml-q4_1/resolve/main/GPT-J-6B-Pygway-v2-ggml-q4_1.bin",
+            "filename": "GPT-J-6B-Pygway-v2-ggml-q4_1.bin",
+            "image": ""
+          },
+          {
+            "id":13, 
+            "name": "Stablelm-base-alpha-7b-ggml-q4",
+            "url": "https://huggingface.co/oeathus/stablelm-base-alpha-7b-ggml-q4/resolve/main/ggml-model-q4_2.bin",
+            "filename": "stablelm-base-alpha-7b-ggml-q4.bin",
+            "image": ""
+          },
+          {
+            "id":14,
+            "name": "RedPajama-INCITE-Chat-7B-v0.1-GGML",
+            "url": "https://huggingface.co/keldenl/RedPajama-INCITE-Chat-7B-v0.1-GGML/resolve/main/ggml-model-q4_1.bin",
+            "filename": "redPajama-INCITE-Chat-7B-v0.1-GGML",
+            "image": ""
+
           }
     ]
 }

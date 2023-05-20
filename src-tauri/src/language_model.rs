@@ -186,6 +186,7 @@ pub fn load_model(model_path: &str) -> Result<Box<dyn llm::Model>, LoadError> {
         "llama".parse().unwrap_or_else(|e| panic!("{e}")),
         Path::new(model_path),
         Default::default(),
+        None,
         load_callback,
     );
     if model.is_ok() {
