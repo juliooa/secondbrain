@@ -1,11 +1,14 @@
 <p align="center">
 <img height="60" src="assets/secondbrain.png">
 </p>
+<p align="center">
+<img height="120" src="assets/secondbrain_icon.png">
+</p>
 
-<h3 align="center">
+<h2 align="center">
 Multi-platform desktop app to download and run Large Language Models(LLM) locally in your computer
-</h3>
-
+</h2>
+<br/>
 <p align="center">
   <img width="600" src="assets/video.gif">
 </p>
@@ -45,7 +48,7 @@ You can also add your own model files to the `/models` folder, and then activate
 
 ## Activate the model
 
-Just select the model and press "Activate", and you are ready to start using the model.
+Just select the model and press "Activate model", and you are ready to start using the model.
 
 ## The prompt is important
 
