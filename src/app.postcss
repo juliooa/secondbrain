@@ -1,0 +1,16 @@
+/* Write your global styles here, in PostCSS syntax */
+
+@font-face {
+	/* Reference name */
+	font-family: 'Quicksand';
+	/* For multiple files use commas, ex: url(), url(), ... */
+	src: url('/fonts/Quicksand-VariableFont_wght.ttf');
+}
+
+.gradient-heading {
+	@apply bg-clip-text text-transparent box-decoration-clone;
+	/* Direction */
+	@apply bg-gradient-to-br;
+	/* Color Stops */
+	@apply from-primary-500 to-pink-500;
+}
