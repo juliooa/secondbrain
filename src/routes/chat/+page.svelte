@@ -74,19 +74,24 @@
 </script>
 
 <div class="flex flex-col h-full">
-	<div class="p-4 variant-soft-primary flex flex-row justify-between">
-		<h3>
-			{#if data.activeModel != null}
-				Conversation with <span class="text-xl text-warning-500">{data.activeModel.name}</span>
-			{:else}
-				<span class="text-xl text-error-500">No active model</span>
-			{/if}
-		</h3>
-		<button class="btn variant-ringed-primary" type="button" on:click={() => onClearPressed()}
-			><span>Clear conversation</span></button
-		>
+	<div class="flex flex-row justify-between">
+		<div class="p-4">
+			<h2>Conversation with</h2>
+			<div class="flex items-center">
+				{#if data.activeModel != null}
+					<p class="text-xl text-warning-400">{data.activeModel.name}</p>
+				{:else}
+					<p class="text-xl text-error-500">No active model</p>
+				{/if}
+			</div>
+		</div>
+		<div class="p-4">
+			<button class="btn variant-ringed-primary" type="button" on:click={() => onClearPressed()}>
+				<span>Clear conversation</span>
+			</button>
+		</div>
 	</div>
-	<div class="flex-grow overflow-y-auto" bind:this={chatContainer}>
+	<div class="flex-grow overflow-y-auto card mx-4" bind:this={chatContainer}>
 		{#each messages as message (message.id)}
 			<MessageBlock {message} />
 		{/each}

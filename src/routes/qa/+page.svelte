@@ -58,7 +58,7 @@
 	</div>
 	<div class="p-4">
 		<div class="flex justify-center items-center">
-			<div class=" card h-full w-full">
+			<div class="card h-full w-full">
 				<div class="p-4 md:p-10">
 					<form
 						class="flex"
