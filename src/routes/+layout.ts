@@ -6,8 +6,8 @@ export const prerender = true;
 export const ssr = false;
 
 export const load = (async ({ depends }) => {
-	let activeModel = await invoke<ActiveLanguageModel>('get_active_model');
 	depends('app:activeModelChanged');
+	let activeModel = await invoke<ActiveLanguageModel>('get_active_model');
 	return {
 		activeModel: activeModel
 	};

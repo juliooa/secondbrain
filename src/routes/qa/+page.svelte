@@ -33,9 +33,6 @@
 
 	function cancelInference() {
 		loading = false;
-		parsedTextBlocks = [];
-		incomingMessage = '';
-		current_query = '';
 		llm
 			.cancelInference()
 			.then(() => {
