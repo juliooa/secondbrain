@@ -3,11 +3,14 @@
 	import '@skeletonlabs/skeleton/styles/all.css';
 	import '../app.postcss';
 	import SideMenu from '$lib/components/SideMenu.svelte';
-	import { Modal } from '@skeletonlabs/skeleton';
-	import { Store } from 'tauri-plugin-store-api';
+	import { Modal, Toast } from '@skeletonlabs/skeleton';
 </script>
 
+<Toast />
 <Modal />
-<SideMenu>
-	<slot />
-</SideMenu>
+
+<div class="bg-surface-50-900-token rounded-none grid grid-cols-[auto_1fr] w-full">
+	<SideMenu>
+		<slot />
+	</SideMenu>
+</div>

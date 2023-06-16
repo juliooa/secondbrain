@@ -16,6 +16,9 @@
         "all": true,
         "show": false,
         "hide": false
+      },
+      "dialog": {
+        "all": true
       }
     },
     "bundle": {

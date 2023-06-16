@@ -11,12 +11,18 @@ export enum MessageRole {
 
 export type LanguageModel = {
 	filename: string;
+	current: boolean;
+	downloaded: boolean;
+	has_info: boolean;
+	isDownloading: boolean;
+	info: LanguageModelInfo;
+};
+
+export type LanguageModelInfo = {
 	name: string;
 	arquitecture: string;
 	url: string;
 	image: string;
-	downloaded: boolean;
-	current: boolean;
 	prompt_base: string;
 };
 
@@ -32,4 +38,17 @@ export interface TextBlock {
 	isCodeBlock: boolean;
 	text: string;
 	language?: string;
+}
+
+export type ActiveLanguageModel = {
+	filename: string;
+	name: string;
+	path: string;
+};
+
+export interface DownloadProgress {
+	model_filename: string;
+	progress: number;
+	total: number;
+	percentage: number;
 }

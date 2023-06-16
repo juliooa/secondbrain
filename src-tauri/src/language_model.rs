@@ -321,18 +321,15 @@ pub async fn delete_model(
     model_filename: &str,
     app_handle: tauri::AppHandle,
 ) -> Result<(), String> {
-    let model_path = app_handle
-        .path_resolver()
-        .app_data_dir()
-        .unwrap()
-        .join(MODELS_FOLDER)
-        .join(model_filename);
+    let models_path_str = localstore::get_models_folder(app_handle.clone()).unwrap();
+    let mut models_path = PathBuf::from(&models_path_str);
+    models_path.push(&model_filename);
 
     let delete_done_callback = Box::new(|| {
         //TODO: maybe send delete done event here
     });
 
-    return downloader::delete(model_path.to_str().unwrap(), delete_done_callback)
+    return downloader::delete(models_path.to_str().unwrap(), delete_done_callback)
         .await
         .map_err(|err| {
             println!("Error downloading model: {}", err);
@@ -340,21 +337,38 @@ pub async fn delete_model(
         });
 }
 
-pub fn load_model(model_path: &str, arquitecture: &str) -> Result<Box<dyn llm::Model>, LoadError> {
+pub fn load_model(
+    model_path: &PathBuf,
+    arquitecture: &str,
+) -> Result<Box<dyn llm::Model>, LoadError> {
     println!("Loading model:");
-    println!("- Path: {}", model_path);
+    println!("- Path: {}", model_path.display());
     println!("- Arquitecture: {}", arquitecture);
 
     let model = llm::load_dynamic(
         arquitecture.parse().unwrap_or_else(|e| panic!("{e}")),
-        Path::new(model_path),
+        model_path,
+        llm::VocabularySource::Model,
         Default::default(),
-        None,
         load_callback,
     );
-    if model.is_ok() {
-        println!("Model loaded!");
+    match model {
+        Ok(model) => {
+            println!("Model loaded!");
+            //println!("Vocabulary size: {}", model.vocabulary());
+            return Ok(model);
+        }
+        Err(err) => {
+            println!("Error loading model: {}", err);
+            return Err(err);
+        }
     }
+    // if (model.is_err()) {
+    //     println!("Error loading model: {}", model.err().unwrap());
+    // }
+    // if model.is_ok() {
+    //     println!("Model loaded!");
+    // }
+}
 
-    return model;
 }
