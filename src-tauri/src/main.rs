@@ -56,6 +56,9 @@ fn main() {
             app.manage(DownloadState {
                 tokio_handle: Mutex::from(None),
             });
+            app.manage(language_model::SessionState {
+                shouldStopInfering: Mutex::from(false),
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -66,6 +69,7 @@ fn main() {
             language_model::delete_model,
             language_model::get_prompt_base,
             language_model::get_active_model,
+            language_model::cancel_inference,
             downloader::download_model,
             downloader::cancel_download,
             configs::show_in_folder,
