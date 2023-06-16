@@ -217,7 +217,7 @@ pub async fn chat(message: String, app_handle: tauri::AppHandle, window: tauri::
             println!("Prompt: {}", prompt);
 
             let mut answer: String = "".to_string();
-            let res = start_inference(&app_handle, model, prompt, |token| {
+            let res = start_inference(&app_handle, model, "this is".to_string(), |token| {
                 println!("{token}");
                 answer.push_str(&token);
                 window
@@ -338,7 +338,6 @@ pub fn load_model(
     match model {
         Ok(model) => {
             println!("Model loaded!");
-            //println!("Vocabulary size: {}", model.vocabulary());
             return Ok(model);
         }
         Err(err) => {
@@ -346,12 +345,6 @@ pub fn load_model(
             return Err(err);
         }
     }
-    // if (model.is_err()) {
-    //     println!("Error loading model: {}", model.err().unwrap());
-    // }
-    // if model.is_ok() {
-    //     println!("Model loaded!");
-    // }
 }
 
 fn start_inference(

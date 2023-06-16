@@ -9,30 +9,33 @@
 	}
 </script>
 
-<form
-	class="input-group flex flex-row rounded-container-token"
-	on:submit|preventDefault={() => {
-		sendMessage(inputMessage);
-		inputMessage = '';
-	}}
->
-	<input
-		class="input p-3"
-		placeholder="Enter a message..."
-		bind:value={inputMessage}
-		disabled={isGenerating}
-	/>
+<div class="flex flex-row">
+	<form
+		class="input-group flex flex-row rounded-container-token"
+		on:submit|preventDefault={() => {
+			sendMessage(inputMessage);
+			inputMessage = '';
+		}}
+	>
+		<input
+			class="input p-3"
+			placeholder="Enter a message..."
+			bind:value={inputMessage}
+			disabled={isGenerating}
+		/>
 
+		{#if !isGenerating}
+			<button class="btn variant-filled-primary rounded-none" type="submit"> Enviar </button>
+		{/if}
+	</form>
 	{#if isGenerating}
 		<button
-			class="btn variant-filled-error rounded-none"
+			class="btn variant-filled-error rounded-container-token"
 			on:click={() => {
 				stopGenerating();
 			}}
 		>
 			Stop
 		</button>
-	{:else}
-		<button class="btn variant-filled-primary rounded-none" type="submit"> Enviar </button>
 	{/if}
-</form>
+</div>
