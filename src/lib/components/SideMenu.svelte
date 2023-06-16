@@ -3,6 +3,11 @@
 	import { page } from '$app/stores';
 	import { derived } from 'svelte/store';
 	import Breathing from './Breathing.svelte';
+	import IconModel from './icons/IconModel.svelte';
+	import IconSettings from './icons/IconSettings.svelte';
+	import IconDocuments from './icons/IconDocuments.svelte';
+	import IconChat from './icons/IconChat.svelte';
+	import IconQA from './icons/IconQA.svelte';
 	const selected = derived(page, ($page) => $page.url.pathname);
 </script>
 
@@ -10,22 +15,22 @@
 	<AppRailTile hover="" href="/">
 		<Breathing /></AppRailTile
 	>
-	<AppRailTile label="Q/A" href="/qa"
-		><iconify-icon width="28" icon="mdi:robot-happy-outline" /></AppRailTile
-	>
-	<AppRailTile label="Chat" href="/chat"
-		><iconify-icon width="28" icon="ion:chatbubbles-outline" /></AppRailTile
-	>
-	<AppRailTile label="Documents" href="/own_documents"
-		><iconify-icon width="28" icon="ion:documents-outline" /></AppRailTile
-	>
+	<AppRailTile label="Q/A" href="/qa">
+		<IconQA />
+	</AppRailTile>
+	<AppRailTile label="Chat" href="/chat">
+		<IconChat />
+	</AppRailTile>
+	<AppRailTile label="Documents" href="/own_documents">
+		<IconDocuments />
+	</AppRailTile>
 	<svelte:fragment slot="trail">
-		<AppRailTile label="Settings" href="/settings"
-			><iconify-icon width="28" icon="ion:settings" /></AppRailTile
-		>
-		<AppRailTile label="Models" href="/models"
-			><iconify-icon width="28" icon="ion:settings" /></AppRailTile
-		>
+		<AppRailTile label="Settings" href="/settings">
+			<IconSettings />
+		</AppRailTile>
+		<AppRailTile label="Models" href="/models">
+			<IconModel />
+		</AppRailTile>
 	</svelte:fragment>
 </AppRail>
 <div class="w-full flex flex-col max-h-screen h-screen">
