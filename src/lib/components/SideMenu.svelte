@@ -8,6 +8,7 @@
 	import IconDocuments from './icons/IconDocuments.svelte';
 	import IconChat from './icons/IconChat.svelte';
 	import IconQA from './icons/IconQA.svelte';
+	import IconModelSettings from './icons/IconModelSettings.svelte';
 	const selected = derived(page, ($page) => $page.url.pathname);
 </script>
 
@@ -25,8 +26,8 @@
 		<IconDocuments />
 	</AppRailTile>
 	<svelte:fragment slot="trail">
-		<AppRailTile label="Settings" href="/settings">
-			<IconSettings />
+		<AppRailTile label="Parameters" href="/parameters">
+			<IconModelSettings />
 		</AppRailTile>
 		<AppRailTile label="Models" href="/models">
 			<IconModel />
