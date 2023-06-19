@@ -66,27 +66,29 @@
 				<span>Prompt</span>
 				<textarea class="textarea" rows="4" placeholder="Your prompt" bind:value={promptTemplate} />
 			</label>
-			<label class="label">
-				<span>Temperature</span>
-				<input class="input" type="number" bind:value={temperature} />
-			</label>
-			<label class="label">
-				<span>Top P</span>
-				<input class="input" type="number" bind:value={topP} />
-			</label>
-			<label class="label">
-				<span>Top K</span>
-				<input class="input" type="number" bind:value={topK} />
-			</label>
-			<label class="label">
-				<span>Repeat Penalty</span>
-				<input class="input" type="number" bind:value={repetitionPenalty} />
-			</label>
-			<button
-				class="btn variant-filled-secondary rounded-none mt-2"
-				type="submit"
-				on:click={saveParameters}>Save</button
-			>
+			<div class="flex flex-col">
+				<div class="flex flex-row items-center">
+					<span class="w-28">Temperature</span>
+					<input class="input w-36" type="number" bind:value={temperature} />
+				</div>
+				<div class="flex flex-row items-center mt-1">
+					<span class="w-28">Top P</span>
+					<input class="input w-36" type="number" bind:value={topP} />
+				</div>
+				<div class="flex flex-row items-center mt-1">
+					<span class="w-28">Top K</span>
+					<input class="input w-36" type="number" bind:value={topK} />
+				</div>
+				<div class="flex flex-row items-center mt-1">
+					<span class="w-28">Repeat Penalty</span>
+					<input class="input w-36" type="number" bind:value={repetitionPenalty} />
+				</div>
+			</div>
+			<div class="flex flex-row items-center mt-1">
+				<button class="btn variant-filled-secondary mt-2" type="submit" on:click={saveParameters}>
+					Save
+				</button>
+			</div>
 		</div>
 	</div>
 </div>
