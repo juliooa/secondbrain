@@ -23,7 +23,7 @@ export type LanguageModelInfo = {
 	arquitecture: string;
 	url: string;
 	image: string;
-	prompt_base: string;
+	prompt_template: string;
 };
 
 export type CommandResponseLanguagesModels = {

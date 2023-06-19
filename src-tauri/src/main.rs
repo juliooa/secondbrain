@@ -3,11 +3,7 @@
 
 use downloader::DownloadState;
 
-use std::{
-    path::{Path, PathBuf},
-    sync::Mutex,
-    vec,
-};
+use std::{path::PathBuf, sync::Mutex, vec};
 use tauri::Manager;
 
 mod configs;
@@ -57,7 +53,7 @@ fn main() {
                 tokio_handle: Mutex::from(None),
             });
             app.manage(language_model::SessionState {
-                shouldStopInfering: Mutex::from(false),
+                should_stop_infering: Mutex::from(false),
             });
             Ok(())
         })
@@ -67,9 +63,11 @@ fn main() {
             language_model::get_language_models,
             language_model::set_current_model,
             language_model::delete_model,
-            language_model::get_prompt_base,
+            language_model::get_prompt_template,
             language_model::get_active_model,
             language_model::cancel_inference,
+            language_model::save_parameters,
+            language_model::get_parameters,
             downloader::download_model,
             downloader::cancel_download,
             configs::show_in_folder,

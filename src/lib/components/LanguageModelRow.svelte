@@ -26,18 +26,11 @@
 	}
 
 	function activateModel() {
-		// If the promptBase is empty, the invoke method fails
-		// because it thinks the promptBase property is not present.
-		let promptBase = '[[message]]';
-		if (model.info?.prompt_base.length > 0) {
-			promptBase = model.info.prompt_base;
-		}
 		tauri
 			.invoke('set_current_model', {
 				modelFilename: model.filename,
 				modelName: model.has_info ? model.info.name : model.filename,
-				modelArquitecture: arquitecture,
-				promptBase: promptBase
+				modelArquitecture: arquitecture
 			})
 			.then(() => {
 				model.current = true;

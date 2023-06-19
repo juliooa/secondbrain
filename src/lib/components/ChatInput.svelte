@@ -25,7 +25,7 @@
 		/>
 
 		{#if !isGenerating}
-			<button class="btn variant-filled-primary rounded-none" type="submit"> Enviar </button>
+			<button class="btn variant-filled-secondary rounded-none" type="submit">Send</button>
 		{/if}
 	</form>
 	{#if isGenerating}

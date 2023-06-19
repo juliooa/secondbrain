@@ -5,10 +5,12 @@ use llm::InferenceRequest;
 use llm::InferenceStats;
 use llm::LoadError;
 use llm::Prompt;
+use rust_decimal::prelude::*;
+use rust_decimal::Decimal;
 use std::convert::Infallible;
 use std::fs;
 use std::io::Write;
-use std::path::Path;
+
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -33,7 +35,7 @@ pub struct LanguageModelInfo {
     arquitecture: String,
     url: String,
     image: String,
-    prompt_base: String,
+    prompt_template: String,
 }
 
 pub struct ChatState {
@@ -56,9 +58,9 @@ pub struct GetLanguageModelsResponse {
 }
 
 #[tauri::command]
-pub fn get_prompt_base(app_handle: tauri::AppHandle) -> String {
+pub fn get_prompt_template(app_handle: tauri::AppHandle) -> String {
     println!("Command: get_prompt");
-    return localstore::get_prompt_base(app_handle);
+    return localstore::get_prompt_template(app_handle);
 }
 
 #[tauri::command]
@@ -109,7 +111,7 @@ pub fn get_language_models(app_handle: tauri::AppHandle) -> GetLanguageModelsRes
             arquitecture: config_model.arquitecture.clone(),
             url: config_model.url.clone(),
             image: config_model.image.clone(),
-            prompt_base: config_model.prompt_base.clone(),
+            prompt_template: config_model.prompt_template.clone(),
         });
 
         if let Some(index) = language_models
@@ -139,7 +141,6 @@ pub fn set_current_model(
     model_filename: &str,
     model_name: &str,
     model_arquitecture: &str,
-    prompt_base: &str,
     app_handle: tauri::AppHandle,
 ) -> Result<(), String> {
     println!("Command: set_current_model, filename:{}", model_filename);
@@ -160,10 +161,6 @@ pub fn set_current_model(
                     path: models_path.to_string_lossy().to_string(),
                     arquitecture: model_arquitecture.to_string(),
                 },
-            )?;
-            localstore::save_prompt_base(
-                Arc::clone(&app_handle_cloned).lock().unwrap().app_handle(),
-                prompt_base.to_string(),
             )?;
 
             Ok(())
@@ -203,10 +200,10 @@ pub async fn chat(message: String, app_handle: tauri::AppHandle, window: tauri::
                 .iter()
                 .map(|message| match message.role {
                     MessageRole::Human => {
-                        let prompt_base = localstore::get_prompt_base(app_handle.clone());
+                        let prompt_template = localstore::get_prompt_template(app_handle.clone());
                         let mut prompt = message.text.clone();
-                        if prompt_base.contains("[[message]]") {
-                            prompt = prompt_base.replace("[[message]]", &prompt);
+                        if prompt_template.contains("[[message]]") {
+                            prompt = prompt_template.replace("[[message]]", &prompt);
                         }
                         prompt
                     }
@@ -249,13 +246,13 @@ pub async fn chat(message: String, app_handle: tauri::AppHandle, window: tauri::
 
 fn stop_infering(app_handle: &tauri::AppHandle) -> bool {
     let session_state = app_handle.state::<SessionState>();
-    let should_stop_infering = session_state.inner().shouldStopInfering.lock().unwrap();
+    let should_stop_infering = session_state.inner().should_stop_infering.lock().unwrap();
     return *should_stop_infering;
 }
 
 fn reset_stop_infering(app_handle: &tauri::AppHandle) {
     let session_state = app_handle.state::<SessionState>();
-    let mut should_stop_infering = session_state.inner().shouldStopInfering.lock().unwrap();
+    let mut should_stop_infering = session_state.inner().should_stop_infering.lock().unwrap();
     *should_stop_infering = false;
 }
 
@@ -264,10 +261,10 @@ pub async fn ask(message: String, app_handle: tauri::AppHandle, window: tauri::W
     let app_state = app_handle.state::<AppState>();
     match app_state.inner().model.lock().unwrap().as_ref() {
         Some(model) => {
-            let prompt_base = localstore::get_prompt_base(app_handle.clone());
+            let prompt_template = localstore::get_prompt_template(app_handle.clone());
             let mut prompt = message;
-            if prompt_base.contains("[[message]]") {
-                prompt = prompt_base.replace("[[message]]", &prompt);
+            if prompt_template.contains("[[message]]") {
+                prompt = prompt_template.replace("[[message]]", &prompt);
             }
             println!("Prompt: {}", prompt);
 
@@ -354,6 +351,7 @@ fn start_inference(
     mut inference_token_callback: impl FnMut(String) -> Result<InferenceFeedback, Infallible>,
 ) -> Result<InferenceStats, InferenceError> {
     reset_stop_infering(&app_handle);
+
     let mut session = model.start_session(Default::default());
     return session.infer::<Infallible>(
         model.as_ref(),
@@ -361,7 +359,7 @@ fn start_inference(
         &InferenceRequest {
             prompt: Prompt::Text(&prompt),
             play_back_previous_tokens: false,
-            parameters: &llm::InferenceParameters::default(),
+            parameters: &build_parameters(app_handle.clone()),
             maximum_token_count: Some(1000),
         },
         &mut Default::default(),
@@ -379,13 +377,79 @@ fn start_inference(
     );
 }
 
+fn build_parameters(app_handle: tauri::AppHandle) -> llm::InferenceParameters {
+    let top_p_top_ksampler = llm::samplers::TopPTopK {
+        top_p: localstore::get_top_p(app_handle.clone())
+            .parse::<f32>()
+            .unwrap(),
+        top_k: localstore::get_top_k(app_handle.clone())
+            .parse::<usize>()
+            .unwrap(),
+        repeat_penalty: localstore::get_repetition_penalty(app_handle.clone())
+            .parse::<f32>()
+            .unwrap(),
+        temperature: localstore::get_temperature(app_handle)
+            .parse::<f32>()
+            .unwrap(),
+        ..Default::default()
+    };
+
+    return llm::InferenceParameters {
+        sampler: Arc::new(top_p_top_ksampler),
+        ..Default::default()
+    };
+}
+
 pub(crate) struct SessionState {
-    pub shouldStopInfering: Mutex<bool>,
+    pub should_stop_infering: Mutex<bool>,
 }
 
 #[tauri::command]
 pub async fn cancel_inference(app_handle: tauri::AppHandle) {
     let session_state = app_handle.state::<SessionState>();
-    let mut should_stop_infering = session_state.inner().shouldStopInfering.lock().unwrap();
+    let mut should_stop_infering = session_state.inner().should_stop_infering.lock().unwrap();
     *should_stop_infering = true;
+}
+
+#[tauri::command]
+pub async fn save_parameters(
+    prompt_template: &str,
+    temperature: &str,
+    top_p: &str,
+    top_k: &str,
+    repetition_penalty: &str,
+    app_handle: tauri::AppHandle,
+) -> Result<(), String> {
+    localstore::save_parameters(
+        app_handle,
+        prompt_template,
+        temperature,
+        top_p,
+        top_k,
+        repetition_penalty,
+    )?;
+
+    return Ok(());
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct InferenceParameters {
+    pub prompt_template: String,
+    pub temperature: String,
+    pub top_p: String,
+    pub top_k: String,
+    pub repetition_penalty: String,
+}
+
+#[tauri::command]
+pub async fn get_parameters(app_handle: tauri::AppHandle) -> Result<InferenceParameters, String> {
+    let parameters = InferenceParameters {
+        prompt_template: localstore::get_prompt_template(app_handle.clone()),
+        temperature: localstore::get_temperature(app_handle.clone()),
+        top_p: localstore::get_top_p(app_handle.clone()),
+        top_k: localstore::get_top_k(app_handle.clone()),
+        repetition_penalty: localstore::get_repetition_penalty(app_handle.clone()),
+    };
+
+    return Ok(parameters);
 }
