@@ -7,9 +7,10 @@ use tokio::{
     io::AsyncWriteExt,
 };
 
+use std::path::PathBuf;
 use std::{collections::HashMap, sync::Mutex};
 
-use crate::language_model::MODELS_FOLDER;
+use crate::localstore;
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -50,11 +51,8 @@ pub async fn download_model(
     window: tauri::Window,
     app_handle: tauri::AppHandle,
 ) -> std::result::Result<String, String> {
-    let mut download_path = app_handle
-        .path_resolver()
-        .app_data_dir()
-        .unwrap()
-        .join(MODELS_FOLDER);
+    let models_path = localstore::get_models_folder(app_handle.clone()).unwrap();
+    let mut download_path = PathBuf::from(&models_path);
     std::fs::create_dir_all(&download_path).unwrap();
     download_path.push(&model_filename);
 
@@ -127,22 +125,25 @@ pub(crate) async fn download<R: Runtime>(
         }
     };
     let total = response.content_length().unwrap_or(0);
+    let mut progress: u64 = 0;
 
     let file = File::create(file_path).await;
     match file {
         Ok(mut f) => {
             let mut stream = response.bytes_stream();
+            println!("Starting streaming of: {}", filename);
             while let Some(chunk) = stream.try_next().await? {
                 let result_write = f.write_all(&chunk).await;
                 if let Err(err) = result_write {
                     println!("Error writing to file: {}", err);
                     return Err(Error::Io(err));
                 }
+                progress += chunk.len() as u64;
                 let _ = window.emit(
                     "progress_download",
                     ProgressPayload {
                         model_filename: filename.to_string(),
-                        progress: chunk.len() as u64,
+                        progress: progress,
                         total,
                     },
                 );

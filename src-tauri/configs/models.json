@@ -1,67 +1,65 @@
 {
     "models": [
         {
-            "filename": "wizardLM-7B.ggml.q4_0.bin",
-            "name": "WizardLM-7B-GGML",
-            "url": "https://huggingface.co/TheBloke/wizardLM-7B-GGML/resolve/previous_llama_ggmlv2/wizardLM-7B.ggml.q4_0.bin",
+            "filename": "open_llama_3b-q4_0-ggjt.bin",
+            "name": "rustformers/open-llama-ggml",
+            "url": "https://huggingface.co/rustformers/open-llama-ggml/resolve/main/open_llama_3b-q4_0-ggjt.bin",
             "arquitecture": "llama",
             "image": "",
-            "prompt_base":"### Instruction: [[message]] ### Response:",
-            "hf_link":"https://huggingface.co/TheBloke/wizardLM-7B-GGML"
+            "prompt_template":"[[message]]",
+            "hf_link":"https://huggingface.co/rustformers/open-llama-ggml",
+            "size":"1.93Gb"
           },
-        {
-            "filename": "wizardLM-13B-Uncensored.ggml.q4_1.bin",
-            "name": "WizardLM-13B-Uncensored-GGML",
-            "url": "https://huggingface.co/TheBloke/WizardLM-13B-Uncensored-GGML/resolve/previous_llama_ggmlv2/wizardLM-13B-Uncensored.ggml.q4_1.bin",            
-            "arquitecture": "llama",
+          {
+            "filename": "RedPajama-INCITE-7B-Instruct-q4_0-ggjt.bin",
+            "name": "rustformers/redpajama-7b-ggml",
+            "url": "https://huggingface.co/rustformers/redpajama-7b-ggml/resolve/main/RedPajama-INCITE-7B-Instruct-q4_0-ggjt.bin",
+            "arquitecture": "gptneox",
             "image": "",
-            "prompt_base":"### Instruction: [[message]] ### Response:",
-            "hf_link": "https://huggingface.co/TheBloke/WizardLM-13B-Uncensored-GGML"
+            "prompt_template":"[[message]]",
+            "hf_link":"https://huggingface.co/rustformers/redpajama-7b-ggml",
+            "size":"3.86Gb"
           },
-        {
-            "filename": "Wizard-Vicuna-13B-Uncensored.ggml.q4_1.bin",
-            "name": "Wizard-Vicuna-13B-Uncensored-GGML",
-            "url": "https://huggingface.co/TheBloke/Wizard-Vicuna-13B-Uncensored-GGML/resolve/previous_llama_ggmlv2/Wizard-Vicuna-13B-Uncensored.ggml.q4_1.bin",            
-            "arquitecture": "llama",
+          {
+            "filename": "gpt4all-j-q4_0.bin",
+            "name": "rustformers/gpt4all-j-ggml",
+            "url": "https://huggingface.co/rustformers/gpt4all-j-ggml/resolve/main/gpt4all-j-q4_0.bin",
+            "arquitecture": "gptj",
             "image": "",
-            "prompt_base":"### Instruction: [[message]] ### Response:",
-            "hf_link": "https://huggingface.co/TheBloke/Wizard-Vicuna-13B-Uncensored-GGML"
+            "prompt_template":"[[message]]",
+            "hf_link":"https://huggingface.co/rustformers/gpt4all-j-ggml",
+            "size":"3.41Gb"
           },
-        {
-            "filename": "stable-vicuna-13B.ggml.q4_0.bin",
-            "name": "Stable-vicuna-13B-GGML",
-            "url": "https://huggingface.co/TheBloke/stable-vicuna-13B-GGML/resolve/previous_llama_ggmlv2/stable-vicuna-13B.ggml.q4_0.bin",            
-            "arquitecture": "llama",
+          {
+            "filename": "mpt-7b-instruct-q4_0.bin",
+            "name": "rustformers/mpt-7b-ggml",
+            "url": "https://huggingface.co/rustformers/mpt-7b-ggml/resolve/main/mpt-7b-instruct-q4_0.bin",
+            "arquitecture": "gptj",
             "image": "",
-            "prompt_base":"### Human: [[message]] ### Assistant:",
-            "hf_link":"https://huggingface.co/TheBloke/stable-vicuna-13B-GGML/"
+            "prompt_template":"[[message]]",
+            "hf_link":"https://huggingface.co/rustformers/mpt-7b-ggml",
+            "size":"3.74Gb"
           },
-        {
-            "filename": "llama-30b.ggml.q4_0.bin",
-            "name": "LLaMa-30B-GGML",
-            "url": "https://huggingface.co/TheBloke/LLaMa-30B-GGML/resolve/previous_llama_ggmlv2/llama-30b.ggml.q4_0.bin",
-            "arquitecture": "llama",
+          {
+            "filename": "stablelm-tuned-alpha-7b-q4_0.bin",
+            "name": "rustformers/stablelm-ggml",
+            "url": "https://huggingface.co/rustformers/stablelm-ggml/resolve/main/stablelm-tuned-alpha-7b-q4_0.bin",
+            "arquitecture": "gptneox",
             "image": "",
-            "prompt_base":"[[message]]",
-            "hf_link": "https://huggingface.co/TheBloke/LLaMa-30B-GGML"
+            "prompt_template":"[[message]]",
+            "hf_link":"https://huggingface.co/rustformers/stablelm-ggml",
+            "size":"4.43Gb"
           },
-        {
-            "filename": "llama-7b.ggml.q4_1.bin",
-            "name": "LLaMa-7B-GGML",
-            "url": "https://huggingface.co/TheBloke/LLaMa-7B-GGML/resolve/previous_llama_ggmlv2/llama-7b.ggml.q4_1.bin",
+          {
+            "filename": "Samantha-7B.ggmlv3.q4_1.bin",
+            "name": "TheBloke/Samantha-7B-GGML",
+            "url": "https://huggingface.co/TheBloke/Samantha-7B-GGML/resolve/main/Samantha-7B.ggmlv3.q4_1.bin",
             "arquitecture": "llama",
             "image": "",
-            "prompt_base":"[[message]]",
-            "hf_link": "https://huggingface.co/TheBloke/LLaMa-7B-GGML"
-          },
-        {
-            "filename": "koala-13B.ggmlv3.q4_1.bin",
-            "name": "koala-13B-GGML",
-            "url": "https://huggingface.co/TheBloke/koala-13B-GGML/resolve/main/koala-13B.ggmlv3.q4_1.bin",
-            "arquitecture": "llama",
-            "image": "",
-            "prompt_base":"BEGINNING OF CONVERSATION: USER: [[message]] GPT:",
-            "hf_link": "https://huggingface.co/TheBloke/koala-13B-GGM"
+            "prompt_template":"You are Samantha, a sentient AI.\nUSER: [[message]]\nASSISTANT:",
+            "hf_link":"https://huggingface.co/TheBloke/Samantha-7B-GGML",
+            "size":"4.21Gb"
           }
+
     ]
 }

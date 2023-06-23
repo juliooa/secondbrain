@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { ask } from '$lib/llm';
+	import type { PageData } from './$types';
+	import * as llm from '$lib/llm';
+	import * as toasts from '$lib/toasts';
 	import type { NewTokenPayload, TextBlock } from '$lib/types';
-	import { CodeBlock, ProgressBar } from '@skeletonlabs/skeleton';
+	import { CodeBlock, ProgressBar, toastStore } from '@skeletonlabs/skeleton';
 	import { listen } from '@tauri-apps/api/event';
-	import { getCurrentModel } from '$lib/local_store';
 	import { parseText } from '$lib/utils';
+
+	export let data: PageData;
 
 	let query = '';
 	let current_query = '';
@@ -18,41 +21,36 @@
 		parsedTextBlocks = parseText(incomingMessage);
 	});
 
-	async function ask_model() {
+	async function askModel() {
 		parsedTextBlocks = [];
 		loading = true;
-		let answer: string = await ask(query);
+		let answer: string = await llm.ask(query);
 		console.log(answer);
 		loading = false;
 		query = '';
 		incomingMessage = '';
 	}
 
-	function cancel_inference() {
+	function cancelInference() {
 		loading = false;
-		parsedTextBlocks = [];
-		incomingMessage = '';
-		current_query = '';
+		llm
+			.cancelInference()
+			.then(() => {
+				console.log('Inference cancelled');
+			})
+			.catch((error) => {
+				console.log('Error cancelling inference: ' + error);
+				toasts.error('Error cancelling inference: ' + error);
+			});
 	}
-
-	async function getModelName() {
-		getCurrentModel().then((currenModel) => {
-			if (currenModel) {
-				console.log(currenModel.name);
-				modelName = currenModel.name;
-			}
-		});
-	}
-	getModelName();
-	let modelName: string;
 </script>
 
-<div class="h-screen">
+<div class="h-full">
 	<div class="p-4">
 		<h2>Ask the model</h2>
 		<div class="flex items-center">
-			{#if modelName != null}
-				<p class="text-xl text-warning-400">{modelName}</p>
+			{#if data.activeModel != null}
+				<p class="text-xl text-warning-400">{data.activeModel.name}</p>
 			{:else}
 				<p class="text-xl text-error-500">No active model</p>
 			{/if}
@@ -60,12 +58,12 @@
 	</div>
 	<div class="p-4">
 		<div class="flex justify-center items-center">
-			<div class=" card h-full w-full">
+			<div class="card h-full w-full">
 				<div class="p-4 md:p-10">
 					<form
 						class="flex"
 						on:submit|preventDefault={() => {
-							ask_model();
+							askModel();
 						}}
 					>
 						<input
@@ -81,7 +79,7 @@
 								type="submit"
 								class="btn variant-filled-error w-1/5 ml-4 text-xl"
 								on:click={() => {
-									cancel_inference();
+									cancelInference();
 								}}>Cancel</button
 							>
 						{:else}
@@ -90,7 +88,7 @@
 								class="btn variant-filled-secondary w-1/5 ml-4 text-xl"
 								on:click={() => {
 									current_query = query;
-									ask_model();
+									askModel();
 								}}>Ask</button
 							>
 						{/if}

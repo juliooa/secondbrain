@@ -1,14 +1,14 @@
 import { invoke } from '@tauri-apps/api';
 
-type CurrentLanguageModel = {
+type ActiveLanguageModel = {
 	filename: string;
 	name: string;
 	path: string;
 };
 
-export async function getCurrentModel(): Promise<CurrentLanguageModel | null> {
+export async function getActiveModel(): Promise<ActiveLanguageModel | null> {
 	try {
-		return await invoke<CurrentLanguageModel>('get_current_model');
+		return await invoke<ActiveLanguageModel>('get_active_model');
 	} catch (e) {
 		console.error(e);
 	}

@@ -3,7 +3,7 @@
 
 use downloader::DownloadState;
 
-use std::{sync::Mutex, vec};
+use std::{path::PathBuf, sync::Mutex, vec};
 use tauri::Manager;
 
 mod configs;
@@ -20,11 +20,11 @@ fn main() {
         .setup(|app| {
             let app_handle = app.app_handle();
 
-            let model: Option<Box<dyn llm::Model>> = match localstore::get_current_model(app_handle)
+            let model: Option<Box<dyn llm::Model>> = match localstore::get_active_model(app_handle)
             {
                 Some(current_model) => {
                     match language_model::load_model(
-                        &current_model.path,
+                        &PathBuf::from(current_model.path),
                         &current_model.arquitecture,
                     ) {
                         Ok(model) => {
@@ -52,6 +52,9 @@ fn main() {
             app.manage(DownloadState {
                 tokio_handle: Mutex::from(None),
             });
+            app.manage(language_model::SessionState {
+                should_stop_infering: Mutex::from(false),
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -60,10 +63,16 @@ fn main() {
             language_model::get_language_models,
             language_model::set_current_model,
             language_model::delete_model,
-            language_model::get_prompt_base,
-            language_model::get_current_model,
+            language_model::get_prompt_template,
+            language_model::get_active_model,
+            language_model::cancel_inference,
+            language_model::save_parameters,
+            language_model::get_parameters,
             downloader::download_model,
             downloader::cancel_download,
+            configs::show_in_folder,
+            configs::choose_directory,
+            configs::get_models_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
