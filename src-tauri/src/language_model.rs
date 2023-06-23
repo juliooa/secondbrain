@@ -36,6 +36,7 @@ pub struct LanguageModelInfo {
     url: String,
     image: String,
     prompt_template: String,
+    size: String,
 }
 
 pub struct ChatState {
@@ -69,7 +70,6 @@ pub fn get_language_models(app_handle: tauri::AppHandle) -> GetLanguageModelsRes
 
     let config_models = configs::get_config_language_models(&app_handle);
     let mut language_models: Vec<LanguageModel> = vec![];
-    //let mut language_model_files: Vec<String> = vec![];
 
     let models_path_option = localstore::get_models_folder(app_handle.clone());
     if let None = models_path_option {
@@ -112,6 +112,7 @@ pub fn get_language_models(app_handle: tauri::AppHandle) -> GetLanguageModelsRes
             url: config_model.url.clone(),
             image: config_model.image.clone(),
             prompt_template: config_model.prompt_template.clone(),
+            size: config_model.size.clone(),
         });
 
         if let Some(index) = language_models

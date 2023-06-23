@@ -24,6 +24,7 @@ export type LanguageModelInfo = {
 	url: string;
 	image: string;
 	prompt_template: string;
+	size: string;
 };
 
 export type CommandResponseLanguagesModels = {

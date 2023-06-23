@@ -15,6 +15,7 @@ pub struct ConfigLanguageModel {
     pub url: String,
     pub image: String,
     pub prompt_template: String,
+    pub size: String,
 }
 
 pub fn get_config_language_models(app_handle: &tauri::AppHandle) -> Vec<ConfigLanguageModel> {

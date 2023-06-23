@@ -141,6 +141,9 @@
 					<div class="text-sm text-gray-200">
 						{model.filename}
 					</div>
+					<div class="text-sm text-gray-200">
+						Size: {model.info.size}
+					</div>
 				{:else}
 					<div class="text-xl font-medium">
 						{model.filename}
@@ -150,7 +153,7 @@
 		</div>
 
 		{#if model.downloaded}
-			<select class="select h-9 w-32" bind:value={arquitecture} disabled={model.current}>
+			<select class="select h-12 w-32" bind:value={arquitecture} disabled={model.current}>
 				<option value="llama">llama</option>
 				<option value="bloom">bloom</option>
 				<option value="gpt2">gpt2</option>
@@ -182,7 +185,7 @@
 					meter="stroke-primary-500"
 					track="stroke-primary-500/30"
 					font={100}
-					width="w-16">{downloadProgress?.percentage}</ProgressRadial
+					width="w-16">{downloadProgress?.percentage}%</ProgressRadial
 				>
 				<div class="flex flex-row mt-1">
 					<div class=" w-28 text-right">
