@@ -89,6 +89,6 @@ Yes, please. Just send your PRs.
 
 Gracias 🤓
 
-# Contact
+# Updates
 
-Hi! you can find me here [@julioandresdev](https://twitter.com/julioandresdev)
+For updates follow here: [@julioandresdev](https://twitter.com/julioandresdev)
