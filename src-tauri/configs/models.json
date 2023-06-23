@@ -59,6 +59,16 @@
             "prompt_template":"You are Samantha, a sentient AI.\nUSER: [[message]]\nASSISTANT:",
             "hf_link":"https://huggingface.co/TheBloke/Samantha-7B-GGML",
             "size":"4.21Gb"
+          },
+          {
+            "filename": "Wizard-Vicuna-7B-Uncensored.ggmlv3.q4_0.bin",
+            "name": "TheBloke/Wizard-Vicuna-7B-Uncensored-GGML",
+            "url": "https://huggingface.co/TheBloke/Wizard-Vicuna-7B-Uncensored-GGML/resolve/main/Wizard-Vicuna-7B-Uncensored.ggmlv3.q4_0.bin",
+            "arquitecture": "llama",
+            "image": "",
+            "prompt_template":"USER: [[message]]\nASSISTANT:",
+            "hf_link":"https://huggingface.co/TheBloke/Wizard-Vicuna-7B-Uncensored-GGML",
+            "size":"3.79Gb"
           }
 
     ]
