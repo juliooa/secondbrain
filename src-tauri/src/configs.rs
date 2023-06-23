@@ -47,6 +47,8 @@ pub fn show_in_folder(path: String) {
 
     #[cfg(target_os = "linux")]
     {
+        use std::fs::metadata;
+        use std::path::PathBuf;
         if path.contains(",") {
             // see https://gitlab.freedesktop.org/dbus/dbus/-/issues/76
             let new_path = match metadata(&path).unwrap().is_dir() {
